@@ -148,7 +148,7 @@ sub load_requirements {
     return unless $mod->{requires};
     return if ref $mod->{requires} ne 'ARRAY';
 
-    load_base($_) or return foreach @{$mod->{requires}};
+    $api->load_base($_) or return foreach @{$mod->{requires}};
 
     return 1
 }
