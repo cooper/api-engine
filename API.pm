@@ -155,7 +155,7 @@ sub load_requirements {
 # attempt to load an API::Base.
 sub load_base {
     my ($api, $base) = (shift, ucfirst shift);
-    return 1 if $INC{"API/Base/$base.pm"}; # already loaded
+    return 1 if $INC{"$$api{base_dir}/$base.pm"}; # already loaded
     $api->log2("loading base '$base'");
     do "$$api{base_dir}/$base.pm" or $api->log2("Could not load base '$base'") and return;
     unshift @API::Module::ISA, "API::Base::$base";
