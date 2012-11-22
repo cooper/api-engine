@@ -4,26 +4,17 @@ package API::Module;
 
 use warnings;
 use strict;
+use utf8;
+use v5.10;
+
+our @EXPORT;
 
 # export/import.
 sub import {
     my $package = caller;
     no strict 'refs';
-    *{$package.'::'.$_} = *{__PACKAGE__.'::'.$_} foreach qw(
-        t_boolean
-        t_string
-        t_number
-        t_server
-        t_user
-    );
+    *{$package.'::'.$_} = *{__PACKAGE__.'::'.$_} foreach @EXPORT;
 }
-
-# constants.
-sub t_boolean () { 'boolean'}
-sub t_string  () { 'string' }
-sub t_number  () { 'number' }
-sub t_server  () { 'server' }
-sub t_user    () {  'user'  }
 
 sub new {
     my ($class, %opts) = @_;
