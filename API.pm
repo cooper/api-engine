@@ -20,6 +20,8 @@ use strict;
 use utf8;
 use feature 'switch';
 
+use Scalar::Util 'blessed';
+
 our $main_api;
 
 # API->new(
