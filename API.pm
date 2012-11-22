@@ -90,9 +90,10 @@ sub load_module {
     }
 
     # load the requirements if they are not already
-    load_requirements($module) or $api->log2("$name: could not satisfy dependencies: ".($! ? $! : $@))
-                                  and class_unload("API::Module::${name}")
-                                  and return;
+    $api->load_requirements($module)
+          or  $api->log2("$name: could not satisfy dependencies: ".($! ? $! : $@))
+          and class_unload("API::Module::${name}")
+          and return;
 
     # initialize
     $api->log2("$name: initializing module");
