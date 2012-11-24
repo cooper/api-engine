@@ -53,6 +53,11 @@ my $api = API->new(
 Attempts to load a module with the specified name.  
 Returns 1 on success and `undef` on fail.
 
+```perl
+$api->load_module('MyModule');
+$api->load_module('Other::Module');
+```
+
 ### Parameters
 
 * __module_name:__ the name of the module to be loaded.
@@ -62,6 +67,11 @@ Returns 1 on success and `undef` on fail.
 Attempts to unload the module with the specified name.  
 Returns 1 on success and `undef` on fail.
 
+```perl
+$api->unload_module('MyModule');
+$api->unload_module('Other::Module');
+```
+
 ### Parameters
 
 * __module_name:__ the name of the module to be unloaded.
@@ -69,6 +79,69 @@ Returns 1 on success and `undef` on fail.
 # API private methods
 
 These methods are provided by the API package, but they are typically only used internally. Use them at your own risk.
+
+## $api->load_base($base_name)
+
+Attempts to load the supplied base if it is not loaded already.  
+Returns 1 if the base is already loaded or was loaded successfully; `undef` otherwise.
+
+```perl
+$api->load_base('ServerCommands');
+```
+
+### Parameters
+
+* __base_name:__ the name of the base to be loaded.
+
+## $api->load_requirements($module)
+
+Attempts to load all of the bases the supplied module requires if they are not already loaded.  
+Returns 1 when all of the bases are successfully loaded; `undef` otherwise.
+
+```perl
+$api->load_requirements($module) or die 'Could not satisfy module dependencies.';
+```
+
+### Parameters
+
+* __module:__ the API::Module object.
+
+## $api->call_unloads($module)
+
+Calls `->unload($module)` on each of the loaded API::Module bases. Allows bases to undo any actions that may have been
+done while the module was loaded.
+
+```perl
+$api->call_unloads($module);
+```
+
+### Parameters
+
+* __module:__ the API::Module object.
+
+## API::class_unload($package_name)
+
+Unloads a Perl package and all of its symbols, almost as if the class never existed.
+
+```perl
+API::class_unload('API::Module::SomeModule');
+```
+
+### Parameters
+
+* __package_name:__ the name of the package being unloaded.
+
+## $api->log2($message)
+
+Calls the `log_sub` specified in the initializer for logging.
+
+```perl
+$api->log2('Hello World!');
+```
+
+### Parameters
+
+* __message:__ the message to be logged.
 
 # API::Module methods
 
