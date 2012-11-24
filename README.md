@@ -22,10 +22,53 @@ for example, might have a base that allows modules to register command handlers.
 `$mod->register_command_handler()`. Bases are loaded as modules require them. API engine comes with no bases. Bases are the
 primary way that software customizes API engine's functionality. Without bases, API engine is rather worthless.
 
-# API methods
+# API public methods
 
 API engine supplies multiple methods to manage API engine objects.
 
+## API->new(%options)
+
+Creates a new API engine manager. A program only typically needs a single API engine to manage all of its module.
+
+```perl
+my $api = API->new(
+    log_sub  => sub { print shift(), "\n" },
+    mod_dir  => 'mod',
+    base_dir => 'lib/API/Base'
+);
+```
+
+### Parameters
+
+* __options:__ a hash of constructor options.
+
+### %options - constructor options
+
+* __log_sub:__ *optional*, a code reference to be called when API engine logs something.
+* __mod_dir:__ the relative or absolute directory where API modules are stored.
+* __base_dir:__ the relative or absolute directory where API::Module bases are stored.
+
+## $api->load_module($module_name)
+
+Attempts to load a module with the specified name.  
+Returns 1 on success and `undef` on fail.
+
+### Parameters
+
+* __module_name:__ the name of the module to be loaded.
+
+## $api->unload_module($module_name)
+
+Attempts to unload the module with the specified name.  
+Returns 1 on success and `undef` on fail.
+
+### Parameters
+
+* __module_name:__ the name of the module to be unloaded.
+
+# API private methods
+
+These methods are provided by the API package, but they are typically only used internally. Use them at your own risk.
 
 # API::Module methods
 
