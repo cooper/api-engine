@@ -146,3 +146,34 @@ $api->log2('Hello World!');
 # API::Module methods
 
 These methods of API::Module are used to manage modules.
+
+## API::Module->new(%options)
+
+Creates a new API::Module instance with the supplied options.  
+Returns `undef` if failure and an API::Module object on success.
+
+```perl
+my $mod = API::Module->new(
+    name        => 'MyModule',
+    version     => '0.25',
+    description => 'adds two-line logging support',
+    initialize  => \&init
+);
+```
+
+### Parameters
+
+* __options:__ a hash of constructor options.
+
+### %options - constructor options
+
+* __name:__ the name of the module.
+* __version:__ the version of the module.
+* __description:__ a brief description of the functionality the module provides.
+* __initialize:__ a code reference to be called when the module is initialized.
+* __void:__ *optional*, a code reference to be called immediately before the module is unloaded.
+* __requires:__ *optional*, an array reference list of API bases the module requires.
+
+## Base methods
+
+Any other methods provided by API::Module bases add much more functionality and usefulness to API::Module objects.
