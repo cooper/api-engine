@@ -124,6 +124,13 @@ sub unload_module {
         return
     }
 
+    # call void if exists.
+    if ($mod->{void}) {
+        $mod->{void}->()
+         or $api->log2("module '$$mod{name}' refused to unload")
+         and return;
+    }
+
     # unload all of its commands, loops, modes, etc.
     # then, unload the package.
     call_unloads($mod);
@@ -132,14 +139,13 @@ sub unload_module {
     # remove from @loaded_modules
     $api->{loaded} = [ grep { $_ != $mod } @{$api->{loaded}} ];
 
-    # call void if exists.
-    if ($mod->{void}) {
-        $mod->{void}->()
-        or $api->log2("module '$$mod{name}' refused to unload")
-        and return;
-    }
-
     return 1
+}
+
+# reload a module.
+sub reload_module {
+    my ($api, $name) = @_;
+    return $api->unload_module($name) && $api->load_module($name);
 }
 
 # load all of the API::Base requirements for a module.
