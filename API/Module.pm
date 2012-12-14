@@ -53,4 +53,8 @@ sub new {
     return bless \%opts, $class;
 }
 
+# loads a submodule.
+sub load_submodule {
+}
+
 1

@@ -22,7 +22,7 @@ use feature 'switch';
 
 use Scalar::Util 'blessed';
 
-our $VERSION = 0.3;
+our $VERSION = 0.4;
 our $main_api;
 
 # API->new(
@@ -46,8 +46,9 @@ sub log2 {
 
 # load a module.
 sub load_module {
-    my ($api, $name) = @_;
+    my ($api, $name, $parent) = @_;
     my $is_dir;
+    my $mod_dir = $parent ? $parent->{dir}.q(/submodules) : $api->{mod_dir};
 
     # if we haven't already, load API::Module.
     if (!$INC{'API/Module.pm'}) {
@@ -62,8 +63,8 @@ sub load_module {
     }
     
     my $loc  = $name; $loc =~ s/::/\//g;
-    my $file = $api->{mod_dir}.q(/).$loc.q(.pm);
-    my $dir  = $api->{mod_dir}.q(/).$loc.q(.module);
+    my $file = $mod_dir.q(/).$loc.q(.pm);
+    my $dir  = $mod_dir.q(/).$loc.q(.module);
     
     # first, make sure it exists.
     if (!-f $file) {
@@ -131,6 +132,13 @@ sub load_module {
     $module->{file}   = $file;
     $module->{dir}    = $dir;
     $module->{is_dir} = 1 if $is_dir;
+    
+    # set inheritance.
+    if ($parent) {
+        $module->{parent} = $parent;
+        $parent->{children} ||= [];
+        push @{$parent->{children}}, $module;
+    }
 
     $api->log2("module '$name' loaded successfully");
     return 1
