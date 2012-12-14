@@ -22,7 +22,7 @@ use feature 'switch';
 
 use Scalar::Util 'blessed';
 
-our $VERSION = 0.4;
+our $VERSION = 0.5;
 our $main_api;
 
 # API->new(
@@ -146,7 +146,7 @@ sub load_module {
 
 # unload a module.
 sub unload_module {
-    my ($api, $name, $file) = @_;
+    my ($api, $name) = @_;
 
     # find it..
     my $mod;
@@ -156,16 +156,29 @@ sub unload_module {
         last;
     }
 
+    # couldn't find it.
     if (!$mod) {
         $api->log2("cannot unload module '$name' because it does not exist");
-        return
+        return;
+    }
+
+    # first, unload the children of the module if it has any.
+    if ($mod->{children} && ref $mod->{children} eq 'ARRAY') {
+        foreach my $child (@{$mod->{children}}) {
+            next if $result $api->unload_module($child);
+            
+            # not successful. if we can't unload the child, we can't unload the parent.
+            $api->log2("cannot unload module '$name' because its child '$$child{name}' was not unloaded");
+            return;
+            
+        }
     }
 
     # call void if exists.
     if ($mod->{void}) {
-        $mod->{void}->()
-         or $api->log2("module '$$mod{name}' refused to unload")
-         and return;
+        $mod->{void}->() or
+        $api->log2("module '$$mod{name}' refused to unload")
+        and return;
     }
 
     # unload all of its commands, loops, modes, etc.
@@ -175,8 +188,12 @@ sub unload_module {
 
     # remove from @loaded_modules
     $api->{loaded} = [ grep { $_ != $mod } @{$api->{loaded}} ];
+    
+    # clear neverending references.
+    delete $mod->{parent};
+    delete $mod->{children};
 
-    return 1
+    return 1;
 }
 
 # reload a module.
