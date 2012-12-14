@@ -7,6 +7,7 @@ use strict;
 use utf8;
 use v5.10;
 
+our $VERSION = $API::VERSION;
 our @EXPORT;
 
 # export/import.
@@ -20,22 +21,25 @@ sub new {
     my ($class, %opts) = @_;
     $opts{requires} ||= [];
     $opts{requires} = [$opts{requires}] if $opts{requires} && ref $opts{requires} ne 'ARRAY';
-
+    
+    # if no API is specified for some reason, default to the main API.
+    $opts{api} ||= $API::main_api;
+    
     # make sure all required options are present.
-    foreach my $what (qw|name version description initialize|) {
-        next if exists $opts{$what};
+    foreach my $what (qw|name version description initialize api|) {
+        next if defined $opts{$what};
         $opts{name} ||= 'unknown';
-        $API::main_api->log2("module $opts{name} does not have '$what' option.");
+        $opts{api}->log2("module '$opts{name}' does not have '$what' option.");
         return
     }
 
     # initialize and void must be code references.
-    if (!defined ref $opts{initialize} or ref $opts{initialize} ne 'CODE') {
-        $API::main_api->log2("module $opts{name} didn't supply initialize CODE.");
+    if (ref $opts{initialize} ne 'CODE') {
+        $opts{api}->log2("module '$opts{name}' supplied initialize, but it is not CODE.");
         return
     }
     if ((defined $opts{void}) && (!defined ref $opts{void} or ref $opts{void} ne 'CODE')) {
-        $API::main_api->log2("module $opts{name} provided void, but it is not CODE.");
+        $opts{api}->log2("module '$opts{name}' provided void, but it is not CODE.");
         return
     }
 

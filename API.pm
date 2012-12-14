@@ -22,6 +22,7 @@ use feature 'switch';
 
 use Scalar::Util 'blessed';
 
+our $VERSION = 0.2;
 our $main_api;
 
 # API->new(
@@ -101,9 +102,12 @@ sub load_module {
     $api->log2($@ ? "module '$name' failed with error: $@" : "module '$name' refused to load") and
     class_unload("API::Module::${name}") and
     return;
+    
+    # all loading and checks completed with no error.
+    push @{$api->{loaded}}, $module;
+    $module->{api} = $api;
 
     $api->log2("uicd module '$name' loaded successfully");
-    push @{$api->{loaded}}, $module;
     return 1
 }
 
