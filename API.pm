@@ -22,7 +22,7 @@ use feature 'switch';
 
 use Scalar::Util 'blessed';
 
-our $VERSION = 0.2;
+our $VERSION = 0.3;
 our $main_api;
 
 # API->new(
@@ -47,6 +47,7 @@ sub log2 {
 # load a module.
 sub load_module {
     my ($api, $name) = @_;
+    my $is_dir;
 
     # if we haven't already, load API::Module.
     if (!$INC{'API/Module.pm'}) {
@@ -59,11 +60,31 @@ sub load_module {
         $api->log2("module '$name' appears to be loaded already.");
         return;
     }
+    
+    my $loc  = $name; $loc =~ s/::/\//g;
+    my $file = $api->{mod_dir}.q(/).$loc.q(.pm);
+    my $dir  = $api->{mod_dir}.q(/).$loc.q(.module);
+    
+    # first, make sure it exists.
+    if (!-f $file) {
+    
+        # okay, the file does not exist. perhaps it is a .module directory.
+        # also ensure that a 'module.pm' is present.
+        if (-d $dir && -f "$dir/module.pm") {
+            $is_dir = 1;
+            $file   = "$dir/module.pm";
+        }
+        
+        # can't find a directory either.
+        else {
+            $api->log2("could not locate '$name' module");
+            return;
+        }
+        
+    }
 
     # load the module.
     $api->log2("loading module '$name'");
-    my $loc    = $name; $loc =~ s/::/\//g;
-    my $file   = $api->{mod_dir}.q(/).$loc.q(.pm);
     my $module = do $file;
     
     # error in do().
@@ -90,24 +111,28 @@ sub load_module {
         return;
     }
 
-    # load the requirements if they are not already
+    # load the requirements if they are not already.
     $api->load_requirements($module)
-          or  $api->log2("$name: could not satisfy dependencies: ".($! ? $! : $@))
+           or $api->log2("$name: could not satisfy dependencies: ".($! ? $! : $@))
           and class_unload("API::Module::${name}")
           and return;
 
-    # initialize
+    # initialize the module, giving up if it returns a false value.
     $api->log2("$name: initializing module");
-    eval { $module->{initialize}->() } or
-    $api->log2($@ ? "module '$name' failed with error: $@" : "module '$name' refused to load") and
-    class_unload("API::Module::${name}") and
-    return;
+    if (!eval { $module->{initialize}->() }) {
+        $api->log2($@ ? "module '$name' failed with error: $@" : "module '$name' refused to load");
+        class_unload("API::Module::${name}");
+        return;
+    }
     
     # all loading and checks completed with no error.
     push @{$api->{loaded}}, $module;
-    $module->{api} = $api;
+    $module->{api}    = $api;
+    $module->{file}   = $file;
+    $module->{dir}    = $dir;
+    $module->{is_dir} = 1 if $is_dir;
 
-    $api->log2("uicd module '$name' loaded successfully");
+    $api->log2("module '$name' loaded successfully");
     return 1
 }
 

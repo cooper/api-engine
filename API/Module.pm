@@ -20,7 +20,11 @@ sub import {
 sub new {
     my ($class, %opts) = @_;
     $opts{requires} ||= [];
-    $opts{requires} = [$opts{requires}] if $opts{requires} && ref $opts{requires} ne 'ARRAY';
+    
+    # if requires was provided and is not an arrayref, it is a single module string.
+    if (defined $opts{requires} && ref $opts{requires} ne 'ARRAY') {
+        $opts{requires} = [ $opts{requires} ];
+    }
     
     # if no API is specified for some reason, default to the main API.
     $opts{api} ||= $API::main_api;
