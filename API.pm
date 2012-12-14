@@ -133,7 +133,7 @@ sub load_module {
     $module->{dir}    = $dir;
     $module->{is_dir} = 1 if $is_dir;
     
-    # set inheritance.
+    # set family hierarchy.
     if ($parent) {
         $module->{parent} = $parent;
         $parent->{children} ||= [];
@@ -165,7 +165,7 @@ sub unload_module {
     # first, unload the children of the module if it has any.
     if ($mod->{children} && ref $mod->{children} eq 'ARRAY') {
         foreach my $child (@{$mod->{children}}) {
-            next if $result $api->unload_module($child);
+            next if $api->unload_module($child);
             
             # not successful. if we can't unload the child, we can't unload the parent.
             $api->log2("cannot unload module '$name' because its child '$$child{name}' was not unloaded");
