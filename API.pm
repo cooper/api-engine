@@ -22,7 +22,7 @@ use feature 'switch';
 
 use Scalar::Util 'blessed';
 
-our $VERSION = 0.8;
+our $VERSION = '1.0';
 our $main_api;
 
 # API->new(
@@ -146,7 +146,7 @@ sub load_module {
 
 # unload a module.
 sub unload_module {
-    my ($api, $name) = @_;
+    my ($api, $name, $recursive) = @_;
 
     # find it..
     my $mod;
@@ -160,6 +160,24 @@ sub unload_module {
     if (!$mod) {
         $api->log2("cannot unload module '$name' because it does not exist");
         return;
+    }
+    
+    # modules depend on this module.
+    if (my @mods = $mod->dependent_modules) {
+    
+        # if this is not recursive, give up.
+        if (!$recursive) {
+            $api->log2("cannot unload module '$name' because loaded module(s) depend on it.");
+            return;
+        }
+        
+        # we have recursive unloaded enabled. we can unload all dependent modules.
+        foreach my $depmod (@mods) {
+            $api->unload_module($depmod->{name}, 1)
+            or  $api->log2("cannot unload module '$name' because a dependent module could not be unloaded.")
+            and return;
+        }
+    
     }
 
     # first, unload the children of the module if it has any.
