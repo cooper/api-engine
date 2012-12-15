@@ -119,7 +119,7 @@ sub load_module {
           and return;
 
     # it is now time to load any other modules this module depends on.
-    if ($mod->{depends}) {
+    if ($module->{depends}) {
         foreach my $mod_name (@{$module->{depends}}) {
             # TODO: this currently does not support dependence of submodules.
             $api->load_module($mod_name)
@@ -228,7 +228,7 @@ sub unload_module {
 sub get_module {
     my ($api, $name) = @_;
     foreach my $module (@{$api->{loaded}}) {
-        return $mod if $module->{name} eq $name || $module->full_name eq $name;
+        return $module if $module->{name} eq $name || $module->full_name eq $name;
     }
     return;
 }
