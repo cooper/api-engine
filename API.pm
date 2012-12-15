@@ -22,7 +22,7 @@ use feature 'switch';
 
 use Scalar::Util 'blessed';
 
-our $VERSION = '1.1';
+our $VERSION = '1.2';
 our $main_api;
 
 # API->new(
@@ -117,6 +117,16 @@ sub load_module {
            or $api->log2("$name: could not satisfy dependencies: ".($! ? $! : $@))
           and class_unload("API::Module::${name}")
           and return;
+
+    # it is now time to load any other modules this module depends on.
+    if ($mod->{depends}) {
+        foreach my $mod_name (@{$mod->{depends}}) {
+            # TODO: this currently does not support dependence of submodules.
+            $api->load_module($mod_name)
+            or  $api->log2("cannot load '$name' because it depends on '$mod_name' which was not loaded");
+            and return;
+        }
+    }
 
     # initialize the module, giving up if it returns a false value.
     $api->log2("$name: initializing module");
