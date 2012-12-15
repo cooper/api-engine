@@ -21,9 +21,11 @@ sub new {
     my ($class, %opts) = @_;
     $opts{requires} ||= [];
     
-    # if requires was provided and is not an arrayref, it is a single module string.
-    if (defined $opts{requires} && ref $opts{requires} ne 'ARRAY') {
-        $opts{requires} = [ $opts{requires} ];
+    # if any of these were provided and are not an arrayref, it is a single string.
+    foreach (qw|requires mod_depends|) {
+        if (defined $opts{$_} && ref $opts{$_} ne 'ARRAY') {
+            $opts{$_} = [ $opts{$_} ];
+        }
     }
     
     # if no API is specified for some reason, default to the main API.
