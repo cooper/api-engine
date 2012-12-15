@@ -61,4 +61,24 @@ sub load_submodule {
     return $mod->{api}->load_module($name, $mod);
 }
 
+# returns true if the module depends on the passed module.
+sub depends_on {
+    my ($module, $mod) = @_;
+    return scalar grep { $_ eq $mod->{name} } @{$module->{depends}};
+}
+
+# returns an array of modules that depend on this module.
+sub dependent_modules {
+    my $module = shift;
+    my @depends;
+    
+    # look through each module.
+    foreach my $mod (@{$mod->{api}{loaded}}) {
+        next if !$mod->depends_on($module);
+        push @depends, $mod;
+    }
+    
+    return @depends;
+}
+
 1
