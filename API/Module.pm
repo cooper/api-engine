@@ -63,8 +63,8 @@ sub load_submodule {
 
 # returns the full name of a module, including parent modules.
 # for example, a module named MyModule whose parent is ParentModule would return
-# ParentModule|MyModule. If ParentModule's parent module were named FatherModule, this
-# would return FatherModule|ParentModule|MyModule.
+# ParentModule.MyModule. If ParentModule's parent module were named FatherModule, this
+# would return FatherModule.ParentModule.MyModule.
 sub full_name {
     my $module = shift;
     
@@ -72,12 +72,12 @@ sub full_name {
     return $module->{name} if !$module->{depends} || !scalar @{$module->{depends}};
  
     # it has a parent. use the parent's full name suffixed by module's this name.
-    return $module->{parent}->full_name().q(|).$module->{name};   
+    return $module->{parent}->full_name().q(.).$module->{name};   
     
 }
 
 # returns true if the module depends on the passed module.
-# note: depends for submodules are written as 'parentMod|subMod'
+# note: depends for submodules are written as 'parentMod.subMod'
 sub depends_on {
     my ($module, $mod) = @_;
     return scalar grep { $_ eq $mod->full_name } @{$module->{depends}};
