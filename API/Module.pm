@@ -73,7 +73,7 @@ sub dependent_modules {
     my @depends;
     
     # look through each module.
-    foreach my $mod (@{$mod->{api}{loaded}}) {
+    foreach my $mod (@{$module->{api}{loaded}}) {
         next if !$mod->depends_on($module);
         push @depends, $mod;
     }
