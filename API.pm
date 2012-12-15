@@ -120,10 +120,10 @@ sub load_module {
 
     # it is now time to load any other modules this module depends on.
     if ($mod->{depends}) {
-        foreach my $mod_name (@{$mod->{depends}}) {
+        foreach my $mod_name (@{$module->{depends}}) {
             # TODO: this currently does not support dependence of submodules.
             $api->load_module($mod_name)
-            or  $api->log2("cannot load '$name' because it depends on '$mod_name' which was not loaded");
+            or  $api->log2("cannot load '$name' because it depends on '$mod_name' which was not loaded")
             and return;
         }
     }
