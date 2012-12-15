@@ -48,6 +48,7 @@ sub log2 {
 sub load_module {
     my ($api, $name, $parent) = @_;
     my $is_dir;
+    undef $parent unless ref $parent;
     my $mod_dir = $parent ? $parent->{dir}.q(/submodules) : $api->{mod_dir};
 
     # if we haven't already, load API::Module.
