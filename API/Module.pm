@@ -55,6 +55,8 @@ sub new {
 
 # loads a submodule.
 sub load_submodule {
+    my ($mod, $name) = @_;
+    return $mod->{api}->load_module($name, $mod);
 }
 
 1
