@@ -264,7 +264,9 @@ sub load_base {
 # call ->_unload for each API::Base.
 sub call_unloads {
     my ($api, $module) = @_;
-    $_->_unload($module) foreach @API::Module::ISA;
+    foreach my $base (@API::Module::ISA) {
+        $base->_unload($module) if $base->can('_unload');
+    }
 }
 
 # unload a class and its symbols.
