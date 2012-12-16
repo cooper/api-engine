@@ -173,6 +173,8 @@ sub unload_module {
         return;
     }
     
+    $api->log2("unloading module '$name'");
+    
     # modules depend on this module.
     if (my @mods = $mod->dependent_modules) {
     
@@ -212,7 +214,7 @@ sub unload_module {
 
     # unload all of its commands, loops, modes, etc.
     # then, unload the package.
-    call_unloads($mod);
+    $api->call_unloads($mod);
     class_unload($mod->{package});
 
     # remove from @loaded_modules
