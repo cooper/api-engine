@@ -22,7 +22,7 @@ use feature 'switch';
 
 use Scalar::Util 'blessed';
 
-our $VERSION = '1.41';
+our $VERSION = '1.5';
 our $main_api;
 
 # API->new(
@@ -125,6 +125,7 @@ sub load_module {
     if ($module->{depends}) {
         foreach my $mod_name (@{$module->{depends}}) {
             # TODO: this currently does not support dependence of submodules.
+            last if $api->get_module($mod_name); # already loaded.
             $api->load_module($mod_name)
             or  $api->log2("cannot load '$name' because it depends on '$mod_name' which was not loaded")
             and return;

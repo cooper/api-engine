@@ -69,7 +69,7 @@ sub full_name {
     my $module = shift;
     
     # if this module has no parent, its full name is simply its name.
-    return $module->{name} if !$module->{depends} || !scalar @{$module->{depends}};
+    return $module->{name} if !$module->{parent};
  
     # it has a parent. use the parent's full name suffixed by module's this name.
     return $module->{parent}->full_name().q(.).$module->{name};   
