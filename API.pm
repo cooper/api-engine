@@ -22,7 +22,7 @@ use feature 'switch';
 
 use Scalar::Util 'blessed';
 
-our $VERSION = '1.7';
+our $VERSION = '1.8';
 our $main_api;
 
 # API->new(
@@ -34,7 +34,8 @@ our $main_api;
 sub new {
     my ($class, %opts) = @_;
     my $api = bless \%opts, $class;
-    $api->{loaded} = [];
+    $api->{loaded}       = [];
+    $api->{loaded_bases} = [];
     return $main_api = $api;
 }
 
@@ -277,11 +278,34 @@ sub load_requirements {
 
 # attempt to load an API::Base.
 sub load_base {
-    my ($api, $base) = (shift, ucfirst shift);
-    return 1 if $INC{"$$api{base_dir}/$base.pm"}; # already loaded
-    $api->log2("loading base '$base'");
-    do "$$api{base_dir}/$base.pm" or $api->log2("Could not load base '$base'") and return;
-    unshift @API::Module::ISA, "API::Base::$base";
+    my ($api, $base_name) = (shift, ucfirst shift);
+    return 1 $base_name ~~ @{$api->{loaded_bases}}; # already loaded
+    $api->log2("loading base '$base_name'");
+    
+    # evaluate the file.
+    do "$$api{base_dir}/$base_name.pm" or $api->log2("Could not load base '$base_name'") and return;
+    
+    # add it to API::Module's ISA.
+    unshift @API::Module::ISA, "API::Base::$base_name";
+    
+    # store the base name to prevent loading it again.
+    push @{$api->{loaded_bases}}, $base_name;
+    
+    return 1;
+}
+
+# register a an API::Base included as a module.
+# $api->register_base_module(SomeBase => $some_module_object)
+sub register_base_module {
+    my ($api, $base_name, $module) = @_;
+    return 1 $base_name ~~ @{$api->{loaded_bases}}; # already loaded
+    
+    $api->log2($module->full_name." registered packaged base '$base_name'");
+
+    unshift @API::Module::ISA, $module->{package};
+    push @{$api->{loaded_bases}}, $base_name;
+    $module->{base_loaded} = [$base_name, $module->{package}];
+    
     return 1;
 }
 
@@ -299,6 +323,15 @@ sub call_unloads {
     foreach my $base (@API::Module::ISA) {
         $base->_unload($module) if $base->can('_unload');
     }
+    
+    # delete the base if necessary.
+    return 1 unless defined my $b = $module->{base_loaded};
+    
+    $api->log2('unloading base '.$b->[0]);
+    $api->{loaded_bases} = [ grep { $_ ne $b->[0] } @{$api->{loaded_bases}} ];
+    @API::Module::ISA = grep { $_ ne $b->[1] } @API::Module::ISA;
+    
+    return 1;
 }
 
 # unload a class and its symbols.
