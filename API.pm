@@ -22,7 +22,7 @@ use feature 'switch';
 
 use Scalar::Util 'blessed';
 
-our $VERSION = '1.6';
+our $VERSION = '1.7';
 our $main_api;
 
 # API->new(
@@ -244,9 +244,17 @@ sub unload_module {
 # fetches a loaded module.
 sub get_module {
     my ($api, $name) = @_;
+    
+    # first try full module name.
     foreach my $module (@{$api->{loaded}}) {
-        return $module if $module->{name} eq $name || $module->full_name eq $name;
+        return $module if $module->full_name eq $name;
     }
+    
+    # then try the lowest level name.
+    foreach my $module (@{$api->{loaded}}) {
+        return $module if $module->{name} eq $name;
+    }
+    
     return;
 }
 
