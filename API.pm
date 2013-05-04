@@ -325,7 +325,7 @@ sub call_unloads {
     }
     
     # delete the base if necessary.
-    return 1 unless defined my $b = $module->{base_loaded};
+    return 1 unless defined(my $b = $module->{base_loaded});
     
     $api->log2('unloading base '.$b->[0]);
     $api->{loaded_bases} = [ grep { $_ ne $b->[0] } @{$api->{loaded_bases}} ];
