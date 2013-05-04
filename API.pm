@@ -22,7 +22,7 @@ use feature 'switch';
 
 use Scalar::Util 'blessed';
 
-our $VERSION = '1.9';
+our $VERSION = '1.91';
 our $main_api;
 
 # API->new(
@@ -132,7 +132,13 @@ sub load_module {
             and return;
         }
     }
-
+    
+    # set module information.
+    $module->{api}    = $api;
+    $module->{file}   = $file;
+    $module->{dir}    = $dir;
+    $module->{is_dir} = 1 if $is_dir;
+    
     # initialize the module, giving up if it returns a false value.
     $api->log2("$name: initializing module");
     if (!eval { $module->{initialize}->() }) {
@@ -143,11 +149,7 @@ sub load_module {
     
     # all loading and checks completed with no error.
     push @{$api->{loaded}}, $module;
-    $module->{api}    = $api;
-    $module->{file}   = $file;
-    $module->{dir}    = $dir;
-    $module->{is_dir} = 1 if $is_dir;
-    
+
     # set family hierarchy.
     if ($parent) {
         $module->{parent} = $parent;
