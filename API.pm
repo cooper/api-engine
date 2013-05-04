@@ -22,7 +22,7 @@ use feature 'switch';
 
 use Scalar::Util 'blessed';
 
-our $VERSION = '1.91';
+our $VERSION = '1.92';
 our $main_api;
 
 # API->new(
@@ -74,10 +74,17 @@ sub load_module {
     if (!-f $file) {
     
         # okay, the file does not exist. perhaps it is a .module directory.
+        
         # also ensure that a 'module.pm' is present.
         if (-d $dir && -f "$dir/module.pm") {
             $is_dir = 1;
             $file   = "$dir/module.pm";
+        }
+        
+        # main module is named after module name.
+        elsif (-d $dir && -f "$dir/$name.pm") {
+            $is_dir = 1;
+            $file   = "$dir/$name.pm";
         }
         
         # can't find a directory either.
