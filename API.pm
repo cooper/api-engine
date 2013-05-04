@@ -70,6 +70,12 @@ sub load_module {
     my $file = $mod_dir.q(/).$loc.q(.pm);
     my $dir  = $mod_dir.q(/).$loc.q(.module);
     
+    # last part of name.
+    my $last_name = $name;
+    if ($name =~ m/^.+::(\w+)$/) {
+        $last_name = $1;
+    }
+    
     # first, make sure it exists.
     if (!-f $file) {
     
@@ -82,9 +88,9 @@ sub load_module {
         }
         
         # main module is named after module name.
-        elsif (-d $dir && -f "$dir/$name.pm") {
+        elsif (-d $dir && -f "$dir/$last_name.pm") {
             $is_dir = 1;
-            $file   = "$dir/$name.pm";
+            $file   = "$dir/$last_name.pm";
         }
         
         # can't find a directory either.
