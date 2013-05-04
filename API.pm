@@ -22,7 +22,7 @@ use feature 'switch';
 
 use Scalar::Util 'blessed';
 
-our $VERSION = '1.5';
+our $VERSION = '1.6';
 our $main_api;
 
 # API->new(
@@ -158,6 +158,13 @@ sub load_module {
     call_loads($module);
 
     $api->log2("module '$name' loaded successfully");
+    
+    # call after_load()
+    if ($module->{after_load} && !eval { $module->{after_load}->() }) {
+        $api->log2($@ ? "module '$name' after_load() failed with error: $@" : "module '$name' after_load() returned a false value; ignoring.");
+        return;
+    }
+    
     return 1;
     
 }
