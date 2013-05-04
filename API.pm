@@ -22,7 +22,7 @@ use feature 'switch';
 
 use Scalar::Util 'blessed';
 
-our $VERSION = '1.2';
+our $VERSION = '1.3';
 our $main_api;
 
 # API->new(
@@ -150,6 +150,9 @@ sub load_module {
         $parent->{children} ||= [];
         push @{$parent->{children}}, $module;
     }
+    
+    # call ->_load on bases.
+    call_loads($module);
 
     $api->log2("module '$name' loaded successfully");
     return 1
@@ -261,6 +264,14 @@ sub load_base {
     do "$$api{base_dir}/$base.pm" or $api->log2("Could not load base '$base'") and return;
     unshift @API::Module::ISA, "API::Base::$base";
     return 1;
+}
+
+# call ->_load for each API::Base.
+sub call_loads {
+    my ($api, $module) = @_;
+    foreach my $base (@API::Module::ISA) {
+        $base->_load($module) if $base->can('_load');
+    }
 }
 
 # call ->_unload for each API::Base.
