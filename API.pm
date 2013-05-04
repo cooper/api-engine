@@ -197,21 +197,21 @@ sub unload_module {
         return;
     }
     
-    $api->log2("unloading module '$name'");
+    $api->log2("unloading module '$$mod{name}'");
     
     # modules depend on this module.
     if (my @mods = $mod->dependent_modules) {
     
         # if this is not recursive, give up.
         if (!$recursive) {
-            $api->log2("cannot unload module '$name' because loaded module(s) depend on it");
+            $api->log2("cannot unload module '$$mod{name}' because loaded module(s) depend on it");
             return;
         }
         
         # we have recursive unloading enabled. we can unload all dependent modules.
         foreach my $depmod (@mods) {
             $api->unload_module($depmod->{name}, 1)
-            or  $api->log2("cannot unload module '$name' because a dependent module could not be unloaded")
+            or  $api->log2("cannot unload module '$$mod{name}' because a dependent module could not be unloaded")
             and return;
         }
     
@@ -223,7 +223,7 @@ sub unload_module {
             next if $api->unload_module($child);
             
             # not successful. if we can't unload the child, we can't unload the parent.
-            $api->log2("cannot unload module '$name' because its child '$$child{name}' was not unloaded");
+            $api->log2("cannot unload module '$$mod{name}' because its child '$$child{name}' was not unloaded");
             return;
             
         }
