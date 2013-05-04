@@ -298,7 +298,7 @@ sub load_base {
 # $api->register_base_module(SomeBase => $some_module_object)
 sub register_base_module {
     my ($api, $base_name, $module) = @_;
-    return 1 $base_name ~~ @{$api->{loaded_bases}}; # already loaded
+    return 1 if $base_name ~~ @{$api->{loaded_bases}}; # already loaded
     
     $api->log2($module->full_name." registered packaged base '$base_name'");
 
