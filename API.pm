@@ -1,4 +1,4 @@
-# Copyright (c) 2012, Mitchell Cooper
+# Copyright (c) 2012-13, Mitchell Cooper
 # API: loads, unloads, and manages modules.
 #
 # This is API engine, an API manager written in Perl. it provides a modular
@@ -22,7 +22,7 @@ use feature 'switch';
 
 use Scalar::Util 'blessed';
 
-our $VERSION = '1.3';
+our $VERSION = '1.4';
 our $main_api;
 
 # API->new(
@@ -48,13 +48,15 @@ sub log2 {
 sub load_module {
     my ($api, $name, $parent) = @_;
     my $is_dir;
-    undef $parent unless ref $parent;
+    
+    # parent must be a module object.
+    undef $parent if !ref $parent || !$parent->isa('API::Module');
+    
+    # the directory in which the module file is located.
     my $mod_dir = $parent ? $parent->{dir}.q(/submodules) : $api->{mod_dir};
 
     # if we haven't already, load API::Module.
-    if (!$INC{'API/Module.pm'}) {
-        require API::Module;
-    }
+    require API::Module if !API::Module->can('new');
 
     # make sure it hasn't been loaded previously.
     foreach my $mod (@{$api->{loaded}}) {
@@ -155,7 +157,8 @@ sub load_module {
     call_loads($module);
 
     $api->log2("module '$name' loaded successfully");
-    return 1
+    return 1;
+    
 }
 
 # unload a module.
