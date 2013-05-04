@@ -279,7 +279,7 @@ sub load_requirements {
 # attempt to load an API::Base.
 sub load_base {
     my ($api, $base_name) = (shift, ucfirst shift);
-    return 1 $base_name ~~ @{$api->{loaded_bases}}; # already loaded
+    return 1 if $base_name ~~ @{$api->{loaded_bases}}; # already loaded
     $api->log2("loading base '$base_name'");
     
     # evaluate the file.
