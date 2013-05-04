@@ -22,7 +22,7 @@ use feature 'switch';
 
 use Scalar::Util 'blessed';
 
-our $VERSION = '1.8';
+our $VERSION = '1.9';
 our $main_api;
 
 # API->new(
@@ -176,12 +176,21 @@ sub unload_module {
 
     # find it..
     my $mod;
-    foreach my $module (@{$api->{loaded}}) {
-        next unless $module->{name} eq $name;
-        $mod = $module;
-        last;
+    
+    # a module object was provided.
+    if (ref $name && $name->isa('API::Module')) {
+        $mod = $name;
     }
-
+    
+    # a name was provided.
+    else {
+        foreach my $module (@{$api->{loaded}}) {
+            next unless $module->{name} eq $name;
+            $mod = $module;
+            last;
+        }
+    }
+    
     # couldn't find it.
     if (!$mod) {
         $api->log2("cannot unload module '$name' because it does not exist");
