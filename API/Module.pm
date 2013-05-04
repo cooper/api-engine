@@ -100,10 +100,11 @@ sub dependent_modules {
 # returns a unique callback name.
 sub unique_callback {
     my ($module, $type, $name) = @_;
-    $name = defined $name ? q(.).$name : q();
+    my $mod_name = $module->full_name;
+    $name        = defined $name ? q(.).$name : q();
     $module->{current_callback_id} ||= 0;
     my $next = $module->{current_callback_id}++;
-    return "api.$type$name($next)";
+    return "api.$mod_name.$type$name($next)";
 }
 
 1
