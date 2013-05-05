@@ -129,11 +129,6 @@ sub load_module {
         return;
     }
 
-    # load the requirements if they are not already.
-    $api->load_requirements($module)
-           or $api->log2("$name: could not satisfy dependencies: ".($! ? $! : $@))
-          and class_unload("API::Module::${name}")
-          and return;
 
     # it is now time to load any other modules this module depends on.
     if ($module->{depends}) {
@@ -145,6 +140,13 @@ sub load_module {
             and return;
         }
     }
+
+    # load the API::Base requirements if they are not already.
+    $api->load_requirements($module)
+           or $api->log2("$name: could not satisfy dependencies: ".($! ? $! : $@))
+          and class_unload("API::Module::${name}")
+          and return;
+
     
     # set module information.
     $module->{api}    = $api;
