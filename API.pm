@@ -22,7 +22,7 @@ use feature 'switch';
 
 use Scalar::Util 'blessed';
 
-our $VERSION = '2.11';
+our $VERSION = '2.12';
 our $main_api;
 
 # API->new(
@@ -63,7 +63,7 @@ sub load_module {
     foreach my $mod (@{$api->{loaded}}) {
         next unless $mod->{name} eq $name;
         $api->log2("module '$name' appears to be loaded already.");
-        return;
+        return 1;
     }
     
     my $loc  = $name; $loc =~ s/::/\//g;
