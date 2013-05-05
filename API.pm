@@ -22,7 +22,7 @@ use feature 'switch';
 
 use Scalar::Util 'blessed';
 
-our $VERSION = '2.02';
+our $VERSION = '2.03';
 our $main_api;
 
 # API->new(
@@ -418,10 +418,11 @@ sub _require_perl {
     if (!$INC{$file}) {
         my $res = eval { require $file; 1 };
         if (!$res) {
-            $module->{api}->log2("failed to load package $package: $@");
+            $api->log2("failed to load package $package: $@");
             return;
         }
         $api->{has_loaded_package}{$package} = 1;
+        $api->log2($module->full_name." loaded package '$package'";
     }
     
     # it's already loaded.
