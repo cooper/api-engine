@@ -22,7 +22,7 @@ use feature 'switch';
 
 use Scalar::Util 'blessed';
 
-our $VERSION = '1.92';
+our $VERSION = '2.0';
 our $main_api;
 
 # API->new(
@@ -320,8 +320,9 @@ sub load_base {
 }
 
 # register a an API::Base included as a module.
-# $api->register_base_module(SomeBase => $some_module_object)
-sub register_base_module {
+# $api->_register_base_module(SomeBase => $some_module_object)
+# use $mod->register_base($base_name)
+sub _register_base_module {
     my ($api, $base_name, $module) = @_;
     return 1 if $base_name ~~ @{$api->{loaded_bases}}; # already loaded
     
@@ -345,8 +346,33 @@ sub call_loads {
 # call ->_unload for each API::Base.
 sub call_unloads {
     my ($api, $module) = @_;
+    
+    # call ->_unload on each base.
     foreach my $base (@API::Module::ISA) {
         $base->_unload($module) if $base->can('_unload');
+    }
+    
+    # check for perl modules that might need unloading.
+    if ($module->{required_perl}) {
+        foreach my $package (@{$module->{required_perl}}) {
+            
+            # remove this module.
+            $api->{required_perl}{$package} =
+            [ grep { $_ != $module } @{$api->{required_perl}{$package}} ]
+            if $api->{required_perl}{$package};
+            
+            # don't even consider unloading the module.
+            next if $api->{never_unload_package}{$package};
+            
+            # check if this is the last module to require it.
+            if (!scalar @{$api->{required_perl}{$package}}) {
+                
+                # it is. let's just unload that package.
+                $api->log2("unloading Perl package $package");
+                class_unload($package);
+                
+            }
+        }
     }
     
     # delete the base if necessary.
@@ -380,6 +406,42 @@ sub class_unload {
     delete $INC{ $inc_file };
 
     return 1
+}
+
+# safely require a perl module.
+sub _require_perl {
+    my ($api, $module, $package) = @_;
+    my $file = $package.q(.pm);
+    $file =~ s/::/\//g;
+    
+    # it's not loaded.
+    if (!$INC{$file}) {
+        my $res = eval { require $package; 1 };
+        if (!$res) {
+            $module->{api}->log2('failed to load package '.$package);
+            return;
+        }
+        $api->{has_loaded_package}{$package} = 1;
+    }
+    
+    # it's already loaded.
+    else {
+    
+        # if no other API modules loaded it, it was loaded beforehand.
+        if (!$api->{required_perl}{$package} && !$api->{has_loaded_package}{$package}) {
+            $api->{never_unload_package}{$package} = 1;
+        }
+    
+    }
+    
+    # store this information.
+    $module->{required_perl}        ||= [];
+    $api->{required_perl}{$package} ||= [];
+    
+    push @{$module->{required_perl}}, $package;
+    push @{$api->{required_perl}{$package}}, $module;
+    
+    return 1;
 }
 
 1

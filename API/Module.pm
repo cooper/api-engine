@@ -107,4 +107,16 @@ sub unique_callback {
     return "api.$mod_name.$type$name($next)";
 }
 
+# register a modular API::Module base.
+sub register_base {
+    my ($module, $base_name) = @_;
+    $module->{api}->_register_base_module($base_name => $module);
+}
+
+# require a perl package.
+sub require_perl {
+    my ($module, $package) = @_;
+    $module->{api}->_require_perl($module, $package);
+}
+
 1
