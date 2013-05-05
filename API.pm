@@ -422,7 +422,7 @@ sub _require_perl {
             return;
         }
         $api->{has_loaded_package}{$package} = 1;
-        $api->log2($module->full_name." loaded package '$package'";
+        $api->log2($module->full_name." loaded package '$package'");
     }
     
     # it's already loaded.
