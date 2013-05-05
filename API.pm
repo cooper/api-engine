@@ -23,7 +23,7 @@ use feature 'switch';
 
 use Scalar::Util 'blessed';
 
-our $VERSION = '2.13';
+our $VERSION = '2.2';
 our $main_api;
 
 # API->new(
@@ -130,6 +130,20 @@ sub load_module {
         return;
     }
 
+    # set module information.
+    $module->{api}    = $api;
+    $module->{file}   = $file;
+    $module->{dir}    = $dir;
+    $module->{is_dir} = 1 if $is_dir;
+
+    # load any perl packages required.
+    if ($module->{depends_perl}) {
+        foreach (@{$module->{depends_perl}}) {
+            $mod->require_perl($_)
+            or $api->log2("cannot load '$name' because it depends on Perl module '$_' which failed to load")
+            and return;
+        }
+    }
 
     # it is now time to load any other modules this module depends on.
     if ($module->_depends_mods) {
@@ -153,13 +167,6 @@ sub load_module {
            or $api->log2("$name: could not satisfy dependencies: ".($! ? $! : $@))
           and class_unload("API::Module::${name}")
           and return;
-
-    
-    # set module information.
-    $module->{api}    = $api;
-    $module->{file}   = $file;
-    $module->{dir}    = $dir;
-    $module->{is_dir} = 1 if $is_dir;
     
     # set family hierarchy.
     if ($parent) {
@@ -308,16 +315,6 @@ sub load_requirements {
     $api->load_base($_) or return foreach @{$mod->_depends_bases};
 
     return 1
-}
-
-sub _depends_bases {
-    my $mod = shift;
-    $mod->{depends_bases} || $mod->{requires};
-}
-
-sub _depends_mods {
-    my $mod = shift;
-    $mod->{depends_mods} || $mod->{depends};
 }
 
 # attempt to load an API::Base.

@@ -22,7 +22,7 @@ sub new {
     $opts{requires} ||= [];
     
     # if any of these were provided and are not an arrayref, it is a single string.
-    foreach (qw|requires mod_depends|) {
+    foreach (qw|requires depends depends_mods depends_bases depends_perl|) {
         if (defined $opts{$_} && ref $opts{$_} ne 'ARRAY') {
             $opts{$_} = [ $opts{$_} ];
         }
@@ -80,7 +80,7 @@ sub full_name {
 # note: depends for submodules are written as 'parentMod.subMod'
 sub depends_on {
     my ($module, $mod) = @_;
-    return scalar grep { $_ eq $mod->full_name } @{$module->{depends}};
+    return scalar grep { $_ eq $mod->full_name } @{$module->_depends_mods};
 }
 
 # returns an array of modules that depend on this module.
@@ -117,6 +117,18 @@ sub register_base {
 sub require_perl {
     my ($module, $package) = @_;
     $module->{api}->_require_perl($module, $package);
+}
+
+# compatibility for older versions.
+sub _depends_bases {
+    my $mod = shift;
+    $mod->{depends_bases} || $mod->{requires};
+}
+
+# compatibility for older versions.
+sub _depends_mods {
+    my $mod = shift;
+    $mod->{depends_mods} || $mod->{depends};
 }
 
 1
