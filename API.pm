@@ -5,6 +5,7 @@
 # programming interface to applications written in Perl. API engine is
 # based on API.pm from the following software (in order chronologically descending)
 #
+# ... ombot, the most modular piece of software ever written for Omegle.com
 # ... UICd, the official Universal Internet Chat server daemon
 # ... juno5, the fifth version of juno-ircd, an IRC daemon written in Perl
 # ... ntirc, a graphical WebKit-powered modular IRC client based upon libirc
@@ -22,7 +23,7 @@ use feature 'switch';
 
 use Scalar::Util 'blessed';
 
-our $VERSION = '2.12';
+our $VERSION = '2.13';
 our $main_api;
 
 # API->new(
@@ -131,8 +132,8 @@ sub load_module {
 
 
     # it is now time to load any other modules this module depends on.
-    if ($module->{depends}) {
-        foreach my $mod_name (@{$module->{depends}}) {
+    if ($module->_depends_mods) {
+        foreach my $mod_name (@{$module->_depends_mods}) {
             
             # module is already loaded.
             last if $api->get_module($mod_name);
@@ -301,12 +302,22 @@ sub reload_module {
 # load all of the API::Base requirements for a module.
 sub load_requirements {
     my ($api, $mod) = @_;
-    return unless $mod->{requires};
-    return if ref $mod->{requires} ne 'ARRAY';
+    return unless $mod->_depends_bases;
+    return if ref $mod->_depends_bases ne 'ARRAY';
 
-    $api->load_base($_) or return foreach @{$mod->{requires}};
+    $api->load_base($_) or return foreach @{$mod->_depends_bases};
 
     return 1
+}
+
+sub _depends_bases {
+    my $mod = shift;
+    $mod->{depends_bases} || $mod->{requires};
+}
+
+sub _depends_mods {
+    my $mod = shift;
+    $mod->{depends_mods} || $mod->{depends};
 }
 
 # attempt to load an API::Base.
