@@ -23,7 +23,7 @@ use feature 'switch';
 
 use Scalar::Util 'blessed';
 
-our $VERSION = '2.2';
+our $VERSION = '2.21';
 our $main_api;
 
 # API->new(
@@ -139,8 +139,8 @@ sub load_module {
     # load any perl packages required.
     if ($module->{depends_perl}) {
         foreach (@{$module->{depends_perl}}) {
-            $mod->require_perl($_)
-            or $api->log2("cannot load '$name' because it depends on Perl module '$_' which failed to load")
+            $module->require_perl($package)
+            or $api->log2("cannot load '$name' because it depends on Perl package '$_' which failed to load")
             and return;
         }
     }
