@@ -122,13 +122,13 @@ sub require_perl {
 # compatibility for older versions.
 sub _depends_bases {
     my $mod = shift;
-    $mod->{depends_bases} || $mod->{requires};
+    $mod->{depends_bases} || $mod->{requires} || [];
 }
 
 # compatibility for older versions.
 sub _depends_mods {
     my $mod = shift;
-    $mod->{depends_mods} || $mod->{depends};
+    $mod->{depends_mods} || $mod->{depends} || [];
 }
 
 1

@@ -23,7 +23,7 @@ use feature 'switch';
 
 use Scalar::Util 'blessed';
 
-our $VERSION = '2.22';
+our $VERSION = '2.23';
 our $main_api;
 
 # API->new(
