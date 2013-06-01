@@ -176,7 +176,8 @@ my $mod = API::Module->new(
 * __description:__ a brief description of the functionality the module provides.
 * __initialize:__ a code reference to be called when the module is initialized.
 * __void:__ *optional*, a code reference to be called immediately before the module is unloaded.
-* __requires:__ *optional*, an array reference list of API bases the module requires.
+* __depends_bases:__ *optional*, an array reference list of API bases the module requires.
+* __depends_mods:__ *optional*, an array reference list of modules this module requires.
 
 ## Base methods
 
