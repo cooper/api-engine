@@ -24,7 +24,7 @@ use feature 'switch';
 use Scalar::Util 'blessed';
 use Module::Loaded;
 
-our $VERSION = '2.24';
+our $VERSION = '2.25';
 our $main_api;
 
 # API->new(
@@ -410,7 +410,6 @@ sub call_unloads {
 # copyright (c) 2011 by Dagfinn Ilmari MannsÃ¥ker.
 sub class_unload {
     my $class = shift;
-    mark_as_unloaded($class);
     no strict 'refs';
 
     # Flush inheritance caches
@@ -423,10 +422,9 @@ sub class_unload {
         delete $symtab->{$symbol};
     }
 
-    my $inc_file = join( '/', split /(?:'|::)/, $class ) . '.pm';
-    delete $INC{ $inc_file };
+    mark_as_unloaded($class);
 
-    return 1
+    return 1;
 }
 
 # safely require a perl module.
