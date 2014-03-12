@@ -22,8 +22,9 @@ use utf8;
 use feature 'switch';
 
 use Scalar::Util 'blessed';
+use Module::Loaded;
 
-our $VERSION = '2.23';
+our $VERSION = '2.24';
 our $main_api;
 
 # API->new(
@@ -119,6 +120,8 @@ sub load_module {
         class_unload("API::Module::${name}");
         return;
     }
+    
+    mark_as_loaded("API::Module::${name}");
 
     # second check that the module doesn't exist already.
     # we really should check this earlier as well, seeing as subroutines and other symbols
@@ -325,6 +328,7 @@ sub load_base {
     
     # evaluate the file.
     do "$$api{base_dir}/$base_name.pm" or $api->log2("Could not load base '$base_name'") and return;
+    mark_as_loaded("API::Base::$base_name");
     
     # add it to API::Module's ISA.
     unshift @API::Module::ISA, "API::Base::$base_name";
@@ -402,10 +406,11 @@ sub call_unloads {
 }
 
 # unload a class and its symbols.
-# from Class::Unload on CPAN.
+# based on Class::Unload from CPAN.
 # copyright (c) 2011 by Dagfinn Ilmari MannsÃ¥ker.
 sub class_unload {
     my $class = shift;
+    mark_as_unloaded($class);
     no strict 'refs';
 
     # Flush inheritance caches
