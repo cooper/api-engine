@@ -24,7 +24,7 @@ use feature 'switch';
 use Scalar::Util 'blessed';
 use Module::Loaded;
 
-our $VERSION = '2.25';
+our $VERSION = '2.26';
 our $main_api;
 
 # API->new(
@@ -120,8 +120,6 @@ sub load_module {
         class_unload("API::Module::${name}");
         return;
     }
-    
-    mark_as_loaded("API::Module::${name}");
 
     # second check that the module doesn't exist already.
     # we really should check this earlier as well, seeing as subroutines and other symbols
@@ -192,8 +190,10 @@ sub load_module {
     # call ->_load on bases.
     call_loads($module);
 
+    (my $full_p = $module->full_name) =~ s/\./::/g;
     $api->log2("module '$name' loaded successfully");
-    
+    mark_as_loaded("API::Module::${full_p}");
+      
     # call after_load()
     if ($module->{after_load} && !eval { $module->{after_load}->() }) {
         $api->log2($@ ? "module '$name' after_load() failed with error: $@" : "module '$name' after_load() returned a false value; ignoring.");
@@ -434,7 +434,7 @@ sub _require_perl {
     $file =~ s/::/\//g;
     
     # it's not loaded.
-    if (!$INC{$file}) {
+    if (!module_is_loaded($package)) {
         my $res = eval { require $file; 1 };
         if (!$res) {
             $api->log2("failed to load package $package: $@");
