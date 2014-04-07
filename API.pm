@@ -24,7 +24,7 @@ use feature 'switch';
 use Scalar::Util 'blessed';
 use Module::Loaded;
 
-our $VERSION = '2.26';
+our $VERSION = '2.3';
 our $main_api;
 
 # API->new(
@@ -200,8 +200,7 @@ sub load_module {
         return;
     }
     
-    return 1;
-    
+    return $module;   
 }
 
 # unload a module.
@@ -283,7 +282,7 @@ sub unload_module {
     delete $mod->{parent};
     delete $mod->{children};
 
-    return 1;
+    return $mod;
 }
 
 # fetches a loaded module.
